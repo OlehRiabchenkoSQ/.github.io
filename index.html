@@ -4,101 +4,79 @@ layout: none
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Oleh Riabchenko - Portfolio</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; height:100%; background:#fff; color:#000; font-family:sans-serif; overflow:hidden; }
 
-    /* Top bar spacing */
-    .top-bar {
-      position: fixed; top: 0; left: 0; width: 100%; height: 80px; z-index: 1001;
-    }
-    #bg-toggle {
-      position: absolute; top: 20px; left: 20px;
-      padding: 8px 16px;
-      background: #fff; color: #000;
-      border: none; border-radius: 4px; cursor: pointer;
-      font-size: 1rem; font-weight: bold;
-      transition: background 0.3s, color 0.3s;
+    /* Background text */
+    .bg-text {
+      position: fixed;
+      top: 40px;
+      left: 0;
+      font-size: 200px;
+      font-weight: bold;
+      white-space: nowrap;
+      color: #000;
+      z-index: 0;
     }
 
     /* Gallery */
     .gallery {
+      position: relative;
+      z-index: 1;
       margin-top: 80px;
       height: calc(100vh - 80px);
       display: flex; flex-wrap: wrap; justify-content: center;
-      gap: 20px; padding: 20px;
-      overflow-y: auto;
+      gap: 20px; padding: 20px; overflow-y: auto;
     }
     .gallery::-webkit-scrollbar { display: none; }
     .gallery { -ms-overflow-style: none; scrollbar-width: none; }
     .gallery img {
-      max-height: 200px; width: auto;
-      border-radius: 4px; cursor: pointer;
-      transition: transform 0.3s ease;
+      max-height: 200px; width: auto; border-radius: 4px;
+      cursor: pointer; transition: transform 0.3s ease;
     }
     .gallery img:hover { transform: scale(1.05); }
 
-    /* Lightbox with blurred backdrop */
+    /* Lightbox */
     #lightbox {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
       display: flex; justify-content: center; align-items: center;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.5s ease;
-      z-index: 1000;
+      opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
+      z-index: 1002;
     }
     #lightbox.active { opacity: 1; pointer-events: auto; }
 
-    /* Zoomable image */
+    /* Main image */
     #lightbox-img {
       max-width: 90%; max-height: 90%; border-radius: 4px;
-      cursor: zoom-in; z-index: 1002;
+      cursor: zoom-in; z-index: 1003; opacity: 0;
       transition: opacity 0.4s ease, transform 0.3s ease;
-      opacity: 0;
     }
     #lightbox-img.active { opacity: 1; }
-    #lightbox-img.zoomed {
-      cursor: zoom-out; transform: scale(1.5);
-    }
+    #lightbox-img.zoomed { cursor: zoom-out; transform: scale(1.5); }
 
-    /* Peek previews (100px outside viewport) */
-    #peek-prev, #peek-next {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      width: 200px; height: auto; opacity: 0.6;
-      border-radius: 4px; cursor: pointer;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-      z-index: 1001;
-    }
-    #peek-prev { left: -100px; }
-    #peek-next { right: -100px; }
-    #peek-prev:hover, #peek-next:hover {
-      transform: translateY(-50%) scale(1.1); opacity: 0.8;
-    }
-
-    /* Close button centered bottom */
+    /* Close button */
     #lb-close {
       position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-      font-size: 2rem; color: #fff; cursor: pointer; z-index: 1003;
+      font-size: 2rem; color: #000; cursor: pointer; z-index: 1004;
       transition: color 0.3s;
     }
-    #lb-close:hover { color: #ddd; }
+    #lb-close:hover { color: #444; }
 
     /* Footer */
     footer {
       position: absolute; bottom: 0; width: 100%; text-align: center;
-      padding: 10px; color: #888; font-size: 0.8rem;
-      background: rgba(0,0,0,0.5);
+      padding: 10px; color: #555; font-size: 0.8rem;
+      background: rgba(255,255,255,0.5); z-index: 1;
     }
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <button id="bg-toggle">Riabchenko</button>
-  </div>
-
+  <div class="bg-text">Riabchenko</div>
   <div class="gallery">
     {% assign imgs = site.static_files | where_exp: "f", "f.path contains '/images/'" %}
     {% for img in imgs %}
@@ -108,8 +86,6 @@ layout: none
 
   <div id="lightbox">
     <img id="lightbox-img" src="" alt="Expanded photo" />
-    <img id="peek-prev" src="" alt="Prev photo">
-    <img id="peek-next" src="" alt="Next photo">
     <div id="lb-close">×</div>
   </div>
 
@@ -117,58 +93,49 @@ layout: none
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const bgToggle = document.getElementById('bg-toggle');
       const items = Array.from(document.querySelectorAll('.gallery img'));
       const lightbox = document.getElementById('lightbox');
       const lbImg = document.getElementById('lightbox-img');
-      const peekPrev = document.getElementById('peek-prev');
-      const peekNext = document.getElementById('peek-next');
       const lbClose = document.getElementById('lb-close');
       let index = 0;
       const sources = items.map(i => i.src);
 
-      // BG button hide in lightbox
-      function toggleBg(visible) {
-        bgToggle.style.display = visible ? 'block' : 'none';
-      }
-
-      // Image change with fade
-      function changeImage(newSrc) {
+      function changeImage(src) {
         lbImg.classList.remove('active');
-        setTimeout(() => {
-          lbImg.src = newSrc;
-          lbImg.classList.add('active');
-        }, 400);
+        lbImg.src = src;
+        setTimeout(() => lbImg.classList.add('active'), 50);
       }
-
-      items.forEach((img, i) => img.addEventListener('click', () => openLB(i)));
 
       function openLB(i) {
         index = i;
-        toggleBg(false);
         changeImage(sources[index]);
-        peekPrev.src = sources[(index - 1 + sources.length) % sources.length];
-        peekNext.src = sources[(index + 1) % sources.length];
         lightbox.classList.add('active');
       }
       function closeLB() {
         lightbox.classList.remove('active');
         lbImg.classList.remove('zoomed', 'active');
         lbImg.style.transformOrigin = '';
-        toggleBg(true);
       }
-      function nextImg() { index = (index + 1) % sources.length; changeImage(sources[index]); updatePeeks(); }
-      function prevImg() { index = (index - 1 + sources.length) % sources.length; changeImage(sources[index]); updatePeeks(); }
-      function updatePeeks() {
-        peekPrev.src = sources[(index - 1 + sources.length) % sources.length];
-        peekNext.src = sources[(index + 1) % sources.length];
+      function nextImg() {
+        index = (index + 1) % sources.length;
+        changeImage(sources[index]);
       }
+      function prevImg() {
+        index = (index - 1 + sources.length) % sources.length;
+        changeImage(sources[index]);
+      }
+
+      items.forEach((img, i) => img.addEventListener('click', () => openLB(i)));
 
       lbImg.addEventListener('click', e => {
         e.stopPropagation();
         lbImg.classList.toggle('zoomed');
-        if (lbImg.classList.contains('zoomed')) lbImg.addEventListener('mousemove', pan);
-        else { lbImg.removeEventListener('mousemove', pan); lbImg.style.transformOrigin = 'center center'; }
+        if (lbImg.classList.contains('zoomed')) {
+          lbImg.addEventListener('mousemove', pan);
+        } else {
+          lbImg.removeEventListener('mousemove', pan);
+          lbImg.style.transformOrigin = 'center center';
+        }
       });
       function pan(e) {
         const r = lbImg.getBoundingClientRect();
@@ -177,8 +144,6 @@ layout: none
         lbImg.style.transformOrigin = `${x}% ${y}%`;
       }
 
-      peekPrev.addEventListener('click', e => { e.stopPropagation(); prevImg(); });
-      peekNext.addEventListener('click', e => { e.stopPropagation(); nextImg(); });
       lbClose.addEventListener('click', e => { e.stopPropagation(); closeLB(); });
       lightbox.addEventListener('click', closeLB);
       document.addEventListener('keydown', e => {
@@ -187,10 +152,6 @@ layout: none
         if (e.key === 'ArrowLeft') prevImg();
         if (e.key === 'Escape') closeLB();
       });
-
-      // Initial state
-      lbImg.classList.add('active');
-      toggleBg(true);
     });
   </script>
 </body>

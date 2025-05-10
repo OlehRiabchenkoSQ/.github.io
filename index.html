@@ -1,3 +1,6 @@
+---
+layout: none
+---
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -34,33 +37,12 @@
   </style>
 </head>
 <body>
-  <div class="gallery"></div>
+  <div class="gallery">
+    {% assign imgs = site.static_files | where_exp: "f", "f.path contains '/images/'" %}
+    {% for img in imgs %}
+      <img src="{{ img.path }}" alt="{{ img.name | remove: 'images/' }}" />
+    {% endfor %}
+  </div>
   <footer>&copy; 2025 Ваше Ім'я</footer>
-
-  <script>
-    // Автоматично підтягуємо всі фото з папки images/
-    async function loadImages() {
-      try {
-        const res = await fetch('images/');
-        const text = await res.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, 'text/html');
-        const links = Array.from(doc.querySelectorAll('a'))
-          .map(a => a.getAttribute('href'))
-          .filter(h => h.match(/\.(jpe?g|png|gif)$/i));
-
-        const gallery = document.querySelector('.gallery');
-        links.forEach(file => {
-          const img = document.createElement('img');
-          img.src = `images/${file}`;
-          img.alt = file;
-          gallery.appendChild(img);
-        });
-      } catch (e) {
-        console.error('Не вдалося підвантажити зображення:', e);
-      }
-    }
-    loadImages();
-  </script>
 </body>
 </html>

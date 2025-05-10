@@ -62,16 +62,16 @@ layout: none
       cursor: zoom-out; transform: scale(1.5);
     }
 
-    /* Peek previews (20% outside viewport) */
+    /* Peek previews (30% outside viewport) */
     #peek-prev, #peek-next {
       position: absolute; top: 50%; transform: translateY(-50%);
-      width: 30vw; max-width: 200px; opacity: 0.6;
+      width: 60vw; opacity: 0.6;
       border-radius: 4px; cursor: pointer;
       transition: transform 0.3s ease, opacity 0.3s ease;
       z-index: 1001;
     }
-    #peek-prev { left: -20vw; }
-    #peek-next { right: -20vw; }
+    #peek-prev { left: -30vw; }
+    #peek-next { right: -30vw; }
     #peek-prev:hover, #peek-next:hover {
       transform: translateY(-50%) scale(1.1); opacity: 0.8;
     }
@@ -79,7 +79,7 @@ layout: none
     /* Close button centered bottom */
     #lb-close {
       position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-      font-size: 2rem; color: #fff; cursor: pointer; z-index: 1001;
+      font-size: 2rem; color: #fff; cursor: pointer; z-index: 1003;
       transition: color 0.3s;
     }
     #lb-close:hover { color: #ddd; }
@@ -121,11 +121,8 @@ layout: none
       bgToggle.addEventListener('click', () => {
         white = !white;
         document.body.style.background = white ? '#fff' : '#000';
-        if (white) {
-          bgToggle.style.background = '#000'; bgToggle.style.color = '#fff';
-        } else {
-          bgToggle.style.background = '#fff'; bgToggle.style.color = '#000';
-        }
+        if (white) { bgToggle.style.background = '#000'; bgToggle.style.color = '#fff'; }
+        else { bgToggle.style.background = '#fff'; bgToggle.style.color = '#000'; }
       });
 
       /* Gallery & Lightbox */

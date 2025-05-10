@@ -18,9 +18,11 @@ layout: none
     }
     #bg-toggle {
       position: absolute; top: 20px; right: 20px;
+      width: 40px; height: 40px;
       background: #fff; color: #000;
-      border: none; padding: 8px 12px; cursor: pointer;
-      border-radius: 4px; transition: background 0.3s, color 0.3s;
+      border: none; border-radius: 50%; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; transition: background 0.3s, color 0.3s;
     }
 
     /* Gallery */
@@ -54,31 +56,31 @@ layout: none
     /* Zoomable image */
     #lightbox-img {
       max-width: 90%; max-height: 90%; border-radius: 4px;
-      transition: transform 0.3s ease; cursor: zoom-in;
+      transition: transform 0.3s ease; cursor: zoom-in; z-index: 1002;
     }
     #lightbox-img.zoomed {
       cursor: zoom-out; transform: scale(1.5);
     }
 
-    /* Peek previews */
+    /* Peek previews (20% outside viewport) */
     #peek-prev, #peek-next {
       position: absolute; top: 50%; transform: translateY(-50%);
-      width: 10vw; max-width: 150px; opacity: 0.5;
+      width: 30vw; max-width: 200px; opacity: 0.6;
       border-radius: 4px; cursor: pointer;
       transition: transform 0.3s ease, opacity 0.3s ease;
       z-index: 1001;
     }
-    #peek-prev { left: 10px; }
-    #peek-next { right: 10px; }
+    #peek-prev { left: -20vw; }
+    #peek-next { right: -20vw; }
     #peek-prev:hover, #peek-next:hover {
       transform: translateY(-50%) scale(1.1); opacity: 0.8;
     }
 
-    /* Close button */
+    /* Close button centered bottom */
     #lb-close {
-      position: absolute; bottom: 20px; right: 20px;
-      font-size: 2rem; color: #fff; cursor: pointer;
-      transition: color 0.3s; z-index: 1001;
+      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+      font-size: 2rem; color: #fff; cursor: pointer; z-index: 1001;
+      transition: color 0.3s;
     }
     #lb-close:hover { color: #ddd; }
 
@@ -106,7 +108,7 @@ layout: none
     <img id="lightbox-img" src="" alt="Expanded photo" />
     <img id="peek-prev" src="" alt="Prev photo">
     <img id="peek-next" src="" alt="Next photo">
-    <div id="lb-close">&times;</div>
+    <div id="lb-close">×</div>
   </div>
 
   <footer>&copy; 2025 Ваше Ім'я</footer>
@@ -141,7 +143,8 @@ layout: none
       function openLB(i) {
         index = i;
         lbImg.src = sources[index];
-        updatePeeks();
+        peekPrev.src = sources[(index - 1 + sources.length) % sources.length];
+        peekNext.src = sources[(index + 1) % sources.length];
         lightbox.classList.add('active');
       }
       function closeLB() {
@@ -152,14 +155,12 @@ layout: none
       function nextImg() {
         index = (index + 1) % sources.length;
         lbImg.src = sources[index];
-        updatePeeks();
+        peekPrev.src = sources[(index - 1 + sources.length) % sources.length];
+        peekNext.src = sources[(index + 1) % sources.length];
       }
       function prevImg() {
         index = (index - 1 + sources.length) % sources.length;
         lbImg.src = sources[index];
-        updatePeeks();
-      }
-      function updatePeeks() {
         peekPrev.src = sources[(index - 1 + sources.length) % sources.length];
         peekNext.src = sources[(index + 1) % sources.length];
       }

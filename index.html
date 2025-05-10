@@ -40,7 +40,7 @@ layout: none
   <div class="gallery">
     {% assign imgs = site.static_files | where_exp: "f", "f.path contains '/images/'" %}
     {% for img in imgs %}
-      <img src="{{ img.path }}" alt="{{ img.name | remove: 'images/' }}" />
+      <img src="{{ img.path | relative_url }}" alt="{{ img.name | remove: 'images/' }}" />
     {% endfor %}
   </div>
   <footer>&copy; 2025 Ваше Ім'я</footer>

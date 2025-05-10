@@ -6,9 +6,8 @@ layout: none
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ваше Ім'я - Портфоліо</title>
+  <title>Oleh Riabchenko - Portfolio</title>
   <style>
-    /* Reset */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
 
@@ -17,12 +16,12 @@ layout: none
       position: fixed; top: 0; left: 0; width: 100%; height: 80px; z-index: 1001;
     }
     #bg-toggle {
-      position: absolute; top: 20px; right: 20px;
-      width: 40px; height: 40px;
+      position: absolute; top: 20px; left: 20px;
+      padding: 8px 16px;
       background: #fff; color: #000;
-      border: none; border-radius: 50%; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: bold; transition: background 0.3s, color 0.3s;
+      border: none; border-radius: 4px; cursor: pointer;
+      font-size: 1rem; font-weight: bold;
+      transition: background 0.3s, color 0.3s;
     }
 
     /* Gallery */
@@ -33,12 +32,10 @@ layout: none
       gap: 20px; padding: 20px;
       overflow-y: auto;
     }
-    /* Hide scrollbar */
     .gallery::-webkit-scrollbar { display: none; }
     .gallery { -ms-overflow-style: none; scrollbar-width: none; }
-
     .gallery img {
-      height: auto; max-height: 200px; width: auto;
+      max-height: 200px; width: auto;
       border-radius: 4px; cursor: pointer;
       transition: transform 0.3s ease;
     }
@@ -49,29 +46,34 @@ layout: none
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
       display: flex; justify-content: center; align-items: center;
-      opacity: 0; pointer-events: none; transition: opacity 0.5s ease; z-index: 1000;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.5s ease;
+      z-index: 1000;
     }
     #lightbox.active { opacity: 1; pointer-events: auto; }
 
     /* Zoomable image */
     #lightbox-img {
       max-width: 90%; max-height: 90%; border-radius: 4px;
-      transition: transform 0.3s ease; cursor: zoom-in; z-index: 1002;
+      cursor: zoom-in; z-index: 1002;
+      transition: opacity 0.4s ease, transform 0.3s ease;
+      opacity: 0;
     }
+    #lightbox-img.active { opacity: 1; }
     #lightbox-img.zoomed {
       cursor: zoom-out; transform: scale(1.5);
     }
 
-    /* Peek previews (30% outside viewport) */
+    /* Peek previews (100px outside viewport) */
     #peek-prev, #peek-next {
       position: absolute; top: 50%; transform: translateY(-50%);
-      width: 60vw; opacity: 0.6;
+      width: 200px; height: auto; opacity: 0.6;
       border-radius: 4px; cursor: pointer;
       transition: transform 0.3s ease, opacity 0.3s ease;
       z-index: 1001;
     }
-    #peek-prev { left: -30vw; }
-    #peek-next { right: -30vw; }
+    #peek-prev { left: -100px; }
+    #peek-next { right: -100px; }
     #peek-prev:hover, #peek-next:hover {
       transform: translateY(-50%) scale(1.1); opacity: 0.8;
     }
@@ -94,7 +96,7 @@ layout: none
 </head>
 <body>
   <div class="top-bar">
-    <button id="bg-toggle">BG</button>
+    <button id="bg-toggle">Riabchenko</button>
   </div>
 
   <div class="gallery">
@@ -111,21 +113,11 @@ layout: none
     <div id="lb-close">×</div>
   </div>
 
-  <footer>&copy; 2025 Ваше Ім'я</footer>
+  <footer>&copy; 2025 Oleh Riabchenko</footer>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      /* Background toggle */
       const bgToggle = document.getElementById('bg-toggle');
-      let white = false;
-      bgToggle.addEventListener('click', () => {
-        white = !white;
-        document.body.style.background = white ? '#fff' : '#000';
-        if (white) { bgToggle.style.background = '#000'; bgToggle.style.color = '#fff'; }
-        else { bgToggle.style.background = '#fff'; bgToggle.style.color = '#000'; }
-      });
-
-      /* Gallery & Lightbox */
       const items = Array.from(document.querySelectorAll('.gallery img'));
       const lightbox = document.getElementById('lightbox');
       const lbImg = document.getElementById('lightbox-img');
@@ -135,43 +127,48 @@ layout: none
       let index = 0;
       const sources = items.map(i => i.src);
 
+      // BG button hide in lightbox
+      function toggleBg(visible) {
+        bgToggle.style.display = visible ? 'block' : 'none';
+      }
+
+      // Image change with fade
+      function changeImage(newSrc) {
+        lbImg.classList.remove('active');
+        setTimeout(() => {
+          lbImg.src = newSrc;
+          lbImg.classList.add('active');
+        }, 400);
+      }
+
       items.forEach((img, i) => img.addEventListener('click', () => openLB(i)));
 
       function openLB(i) {
         index = i;
-        lbImg.src = sources[index];
+        toggleBg(false);
+        changeImage(sources[index]);
         peekPrev.src = sources[(index - 1 + sources.length) % sources.length];
         peekNext.src = sources[(index + 1) % sources.length];
         lightbox.classList.add('active');
       }
       function closeLB() {
         lightbox.classList.remove('active');
-        lbImg.classList.remove('zoomed');
+        lbImg.classList.remove('zoomed', 'active');
         lbImg.style.transformOrigin = '';
+        toggleBg(true);
       }
-      function nextImg() {
-        index = (index + 1) % sources.length;
-        lbImg.src = sources[index];
-        peekPrev.src = sources[(index - 1 + sources.length) % sources.length];
-        peekNext.src = sources[(index + 1) % sources.length];
-      }
-      function prevImg() {
-        index = (index - 1 + sources.length) % sources.length;
-        lbImg.src = sources[index];
+      function nextImg() { index = (index + 1) % sources.length; changeImage(sources[index]); updatePeeks(); }
+      function prevImg() { index = (index - 1 + sources.length) % sources.length; changeImage(sources[index]); updatePeeks(); }
+      function updatePeeks() {
         peekPrev.src = sources[(index - 1 + sources.length) % sources.length];
         peekNext.src = sources[(index + 1) % sources.length];
       }
 
-      /* Zoom & Pan */
       lbImg.addEventListener('click', e => {
         e.stopPropagation();
         lbImg.classList.toggle('zoomed');
-        if (lbImg.classList.contains('zoomed')) {
-          lbImg.addEventListener('mousemove', pan);
-        } else {
-          lbImg.removeEventListener('mousemove', pan);
-          lbImg.style.transformOrigin = 'center center';
-        }
+        if (lbImg.classList.contains('zoomed')) lbImg.addEventListener('mousemove', pan);
+        else { lbImg.removeEventListener('mousemove', pan); lbImg.style.transformOrigin = 'center center'; }
       });
       function pan(e) {
         const r = lbImg.getBoundingClientRect();
@@ -180,23 +177,20 @@ layout: none
         lbImg.style.transformOrigin = `${x}% ${y}%`;
       }
 
-      /* Peek navigation */
       peekPrev.addEventListener('click', e => { e.stopPropagation(); prevImg(); });
       peekNext.addEventListener('click', e => { e.stopPropagation(); nextImg(); });
-
-      /* Close button */
       lbClose.addEventListener('click', e => { e.stopPropagation(); closeLB(); });
-
-      /* Close on backdrop click */
       lightbox.addEventListener('click', closeLB);
-
-      /* Keyboard */
       document.addEventListener('keydown', e => {
         if (!lightbox.classList.contains('active')) return;
         if (e.key === 'ArrowRight') nextImg();
         if (e.key === 'ArrowLeft') prevImg();
         if (e.key === 'Escape') closeLB();
       });
+
+      // Initial state
+      lbImg.classList.add('active');
+      toggleBg(true);
     });
   </script>
 </body>
